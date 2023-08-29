@@ -12,7 +12,7 @@ MAX_SECTION_LEN = 2000
 SEPARATOR = "\n* "
 ENCODING = "gpt2"  # encoding for text-davinci-003
 
-openai.api_key = "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"  # os.getenv("OPENAI_API_KEY")
+openai.api_key = "__sk-Bb9KN5nlb0B1SEz1ZWrhT3BlbkFJloPknGl2QUp98OCqKQxQ__"  # os.getenv("OPENAI_API_KEY")
 
 
 ## This code was written by OpenAI: https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
