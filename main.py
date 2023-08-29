@@ -12,7 +12,7 @@ MAX_SECTION_LEN = 2000
 SEPARATOR = "\n* "
 ENCODING = "gpt2"  # encoding for text-davinci-003
 
-openai.api_key = "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"  # os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"  # os.getenv("OPENAI_API_KEY")
 
 
 ## This code was written by OpenAI: https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
@@ -59,8 +59,6 @@ def order_by_similarity(query: str, contexts: dict[(str, str), np.array]) -> lis
 
     return document_similarities
 
-# url = ("https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/DigitelNews/%D7%90%D7%A4%D7%9C%D7%99%D7%A7"
-#        "%D7%A6%D7%99%D7%99%D7%AA%20106")
 url = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679&from=EN"
 df = pd.DataFrame({
     "title": [],
@@ -106,8 +104,21 @@ try:
     df['content'] = sections
     df['tokens'] = tokens_per_section
 
-    df = df.set_index(["title", "heading"])
+    #df = df.set_index(["title", "heading"])
     print(f"{len(df)} rows in the data.")
+
+    url = ("https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/DigitelNews/%D7%90%D7%A4%D7%9C%D7%99%D7%A7"
+           "%D7%A6%D7%99%D7%99%D7%AA%20106")
+    response = requests.get(url)
+    content = json.loads(response.content)
+    for item in content:
+        df1 = pd.DataFrame({
+            "title": [item['title']],
+            "content": [item['announText']],
+            "heading": [item['brief']],
+            "url": [item['id']]
+        })
+        df = pd.concat([df, df1])
 
     document_embeddings = compute_doc_embeddings(df)
 
@@ -115,9 +126,14 @@ try:
     example_entry = list(document_embeddings.items())[0]
     print(f"{example_entry[0]} : {example_entry[1][:5]}... ({len(example_entry[1])} entries)")
 
-    items = order_by_similarity("Can the commission implement acts for exchanging information?", document_embeddings)[:5]
-    items = order_by_similarity("Am I allowed to delete my personal information?", document_embeddings)[:5]
-    print(items)
+
+    docs = order_by_similarity("שנת הלימודים", document_embeddings)[:5]
+    print(docs)
+    docs = order_by_similarity("Can the commission implement acts for exchanging information?", document_embeddings)[:5]
+    print(docs)
+    docs = order_by_similarity("Am I allowed to delete my personal information?", document_embeddings)[:5]
+    print(docs)
+
 
     # content = json.loads(response.content)
     #
