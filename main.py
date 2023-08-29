@@ -15,7 +15,7 @@ ENCODING = "gpt2"  # encoding for text-davinci-003
 encoding = tiktoken.get_encoding(ENCODING)
 separator_len = len(encoding.encode(SEPARATOR))
 
-openai.api_key = "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" #os.getenv("OPENAI_API_KEY")
+openai.api_key = "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" #os.getenv("OPENAI_API_KEY")
 
 ## This code was written by OpenAI: https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
 def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
@@ -31,6 +31,7 @@ def compute_doc_embeddings(df: pd.DataFrame) -> dict[tuple[str, str], list[float
     
     Return a dictionary that maps between each embedding vector and the index of the row that it corresponds to.
     """
+    print(df)
     return {
         idx: get_embedding(r.content) for idx, r in df.iterrows()
     }
