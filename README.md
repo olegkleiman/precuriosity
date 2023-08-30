@@ -6,3 +6,5 @@ Then
 pip install -r requirements.txt
 
 Azure Storage Account: satlvopenaidev
+
+Azure DB: tlvdbadevserver/curiosity
