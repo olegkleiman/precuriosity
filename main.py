@@ -1,5 +1,5 @@
 #
-# Created by Erez Roter, supervised by Loren Taboo
+# Created by Erez Roted, supervised by Loren Taboo
 #
 
 import requests
@@ -136,9 +136,14 @@ try:
 
     document_embeddings = compute_doc_embeddings(df)
 
-    docs = order_by_similarity("חצר טבעית", document_embeddings)
+    docs = order_by_similarity(#"חצר טבעית",
+                               "שנת לימודים",
+                               document_embeddings)
     docs = docs[:5]
     print(docs)
+
+    docIndex = docs[0][1]
+    print(df.iloc[docIndex].content)
 
 except requests.exceptions.HTTPError as error:
     print(error)
