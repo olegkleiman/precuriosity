@@ -92,8 +92,10 @@ try:
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/פרוייקטים תכנון עיר/mobileapp",
+            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הטבות/mobileapp"
         ],
         'title_map': [
+            "title",
             "title",
             "title",
             "title",
@@ -104,21 +106,25 @@ try:
             "summary",
             "summary",
             "summary",
-            "summary"
+            "summary",
+            "title"
         ],
         "content_map": [
             "comments",
             "content",
             "details",
             "content",
-            "summary"],
+            "summary",
+            "remarks"],
         "url_map": [
             "previewPage",
             "_x05ea__x05e6__x05d5__x05d2__x05",
             "fileRef",
             "fileRef",
-            "fileRef"],
+            "fileRef",
+            "previewPage"],
         "id_map": [
+            "id",
             "id",
             "id",
             "id",
