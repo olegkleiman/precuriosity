@@ -1,10 +1,14 @@
+#
+# Created by Erez Roter, supervised by Loren Taboo
+#
+
 import requests
 from bs4 import BeautifulSoup
 import json
-import numpy as np
 import pandas as pd
-import openai
+import numpy as np
 import tiktoken
+import openai
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
 COMPLETIONS_MODEL = "gpt-4"
@@ -12,10 +16,8 @@ MAX_SECTION_LEN = 2000
 SEPARATOR = "\n* "
 ENCODING = "gpt2"  # encoding for text-davinci-003
 
-openai.api_key = "__sk-Bb9KN5nlb0B1SEz1ZWrhT3BlbkFJloPknGl2QUp98OCqKQxQ__"  # os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"  # os.getenv("OPENAI_API_KEY")
 
-
-## This code was written by OpenAI: https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
 def get_embedding(text: str, model: str = EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
         model=model,
@@ -59,96 +61,84 @@ def order_by_similarity(query: str, contexts: dict[(str, str), np.array]) -> lis
 
     return document_similarities
 
-url = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679&from=EN"
+
+def remove_tags(html):
+    # parse html content
+    soup = BeautifulSoup(html, "html.parser")
+
+    for data in soup(['style', 'script', 'p']):
+        # Remove tags
+        data.decompose()
+
+    # return data by retrieving the tag content
+    return ' '.join(soup.stripped_strings)
+
 df = pd.DataFrame({
     "title": [],
     "heading": [],
     "content": [],
     "tokens": [],
-    "url": []
+    "url": [],
+    "id": [],
 })
 
 try:
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    legislation = soup.text
-
-    # Now we split the legislation into sections, each section starts with the world "Artikel"
-    search_document = legislation.split("HAVE ADOPTED THIS REGULATION:")
-    sections = search_document[1].split('\nArticle')
-    sections = ["Article" + section for section in sections]
-    sections = sections[1:]
-
-    print(f'Amount of Articles: {len(sections)}')
-
-    section_titles = soup.find_all(class_='sti-art')
-    section_titles = [title.text for title in section_titles]
-
-    section_titles[:5]
-
-    # We can now parse each section using tiktoken, and calculate the amount of tokens per section
     enc = tiktoken.encoding_for_model("gpt-4")
-    tokens_per_section = []
+    data = {
+        'url': [#"https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
+                #"https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
+                "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp"],
+        'title_map': [#"title",
+                      #"title",
+                      "title"],
+        "heading_map": [#"summary",
+                        #"summary",
+                        "summary"],
+        "content_map": [#"comments",
+                        #"content",
+                        "details"],
+        "url_map": [#"previewPage",
+                    #"_x05ea__x05e6__x05d5__x05d2__x05",
+                    "fileRef"],
+        "id_map": [#"id",
+                   #"id",
+                   "id"]
+    }
+    queryDf = pd.DataFrame(data)
 
-    for section in sections:
-        tokens = enc.encode(section)
-        tokens_per_section.append(len(tokens))
+    for index, ref in queryDf.iterrows():
+        url = ref["url"]
+        response = requests.get(url)
+        content = json.loads(response.content)
 
-    # Create a loop of 99 iterations
-    headings = []
-    for i in range(99):
-        headings.append("Article " + str(i + 1))
+        title_column_name = ref["title_map"]
+        content_column_name = ref["content_map"]
+        head_column_name = ref["heading_map"]
+        url_column_name = ref["url_map"]
+        id_column_name = ref["id_map"]
 
-    df['title'] = section_titles
-    df['heading'] = headings
-    df['content'] = sections
-    df['tokens'] = tokens_per_section
+        for item in content:
+            doc = item[content_column_name]
+            clean_doc = remove_tags(doc)
 
-    #df = df.set_index(["title", "heading"])
-    print(f"{len(df)} rows in the data.")
+            tokens = enc.encode(clean_doc)
 
-    url = ("https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/DigitelNews/%D7%90%D7%A4%D7%9C%D7%99%D7%A7"
-           "%D7%A6%D7%99%D7%99%D7%AA%20106")
-    response = requests.get(url)
-    content = json.loads(response.content)
-    for item in content:
-        df1 = pd.DataFrame({
-            "title": [item['title']],
-            "content": [item['announText']],
-            "heading": [item['brief']],
-            "url": [item['id']]
-        })
-        df = pd.concat([df, df1])
+            if len(tokens) > 0:
+                df1 = pd.DataFrame({
+                    "title": [item[title_column_name]],
+                    "content": clean_doc,
+                    "heading": [item[head_column_name]],
+                    "url": [item[url_column_name]],
+                    "tokens": [len(tokens)],
+                    "id": [item[id_column_name]]
+                })
+                df = pd.concat([df, df1], ignore_index=True)
 
     document_embeddings = compute_doc_embeddings(df)
 
-    # An example embedding:
-    example_entry = list(document_embeddings.items())[0]
-    print(f"{example_entry[0]} : {example_entry[1][:5]}... ({len(example_entry[1])} entries)")
-
-
-    docs = order_by_similarity("שנת הלימודים", document_embeddings)[:5]
+    docs = order_by_similarity("חצר טבעית", document_embeddings)
+    docs = docs[:5]
     print(docs)
-    docs = order_by_similarity("Can the commission implement acts for exchanging information?", document_embeddings)[:5]
-    print(docs)
-    docs = order_by_similarity("Am I allowed to delete my personal information?", document_embeddings)[:5]
-    print(docs)
-
-
-    # content = json.loads(response.content)
-    #
-    # for item in content:
-    #     df1 = pd.DataFrame({
-    #         "content": [item['announText']],
-    #         "url": [item['id']]
-    #     })
-    #     df = pd.concat([df, df1])
-    #
-    #     df1 = pd.DataFrame({
-    #         "heading": [item['brief']],
-    #         "url": [item['id']]
-    #     })
-    #     df = pd.concat([df, df1])
 
 except requests.exceptions.HTTPError as error:
     print(error)
