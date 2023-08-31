@@ -87,34 +87,40 @@ df = pd.DataFrame({
 try:
     enc = tiktoken.encoding_for_model("gpt-4")
     data = {
-        'url': [  # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
+        'url': [
+            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
             # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/פרוייקטים תכנון עיר/mobileapp",
         ],
-        'title_map': [  # "title",
+        'title_map': [
+            "title",
             # "title",
             "title",
             "title",
             "title"],
-        "heading_map": [  # "summary",
+        "heading_map": [
+            "summary",
             # "summary",
             "summary",
             "summary",
             "summary"
         ],
-        "content_map": [  # "comments",
+        "content_map": [
+            "comments",
             # "content",
             "details",
             "content",
             "summary"],
-        "url_map": [  # "previewPage",
+        "url_map": [
+            "previewPage",
             # "_x05ea__x05e6__x05d5__x05d2__x05",
             "fileRef",
             "fileRef",
             "fileRef"],
-        "id_map": [  # "id",
+        "id_map": [
+            "id",
             # "id",
             "id",
             "id",
