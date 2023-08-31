@@ -18,6 +18,7 @@ ENCODING = "gpt2"  # encoding for text-davinci-003
 
 openai.api_key = "__sk-uk0I6v0yTdajwETf2dZAT3BlbkFJmLY5CQ3hJGMmi7dUEotx__"  # os.getenv("OPENAI_API_KEY")
 
+
 def get_embedding(text: str, model: str = EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
         model=model,
@@ -90,25 +91,32 @@ try:
             # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
             "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
+            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/פרוייקטים תכנון עיר/mobileapp",
         ],
         'title_map': [  # "title",
             # "title",
+            "title",
             "title",
             "title"],
         "heading_map": [  # "summary",
             # "summary",
             "summary",
-            "summary"],
+            "summary",
+            "summary"
+        ],
         "content_map": [  # "comments",
             # "content",
             "details",
-            "content"],
+            "content",
+            "summary"],
         "url_map": [  # "previewPage",
             # "_x05ea__x05e6__x05d5__x05d2__x05",
+            "fileRef",
             "fileRef",
             "fileRef"],
         "id_map": [  # "id",
             # "id",
+            "id",
             "id",
             "id"]
     }
