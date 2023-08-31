@@ -16,7 +16,7 @@ MAX_SECTION_LEN = 2000
 SEPARATOR = "\n* "
 ENCODING = "gpt2"  # encoding for text-davinci-003
 
-openai.api_key = "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"  # os.getenv("OPENAI_API_KEY")
+openai.api_key = "__sk-uk0I6v0yTdajwETf2dZAT3BlbkFJmLY5CQ3hJGMmi7dUEotx__"  # os.getenv("OPENAI_API_KEY")
 
 def get_embedding(text: str, model: str = EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
