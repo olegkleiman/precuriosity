@@ -73,6 +73,7 @@ def remove_tags(html):
     # return data by retrieving the tag content
     return ' '.join(soup.stripped_strings)
 
+
 df = pd.DataFrame({
     "title": [],
     "heading": [],
@@ -85,24 +86,31 @@ df = pd.DataFrame({
 try:
     enc = tiktoken.encoding_for_model("gpt-4")
     data = {
-        'url': [#"https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
-                #"https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
-                "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp"],
-        'title_map': [#"title",
-                      #"title",
-                      "title"],
-        "heading_map": [#"summary",
-                        #"summary",
-                        "summary"],
-        "content_map": [#"comments",
-                        #"content",
-                        "details"],
-        "url_map": [#"previewPage",
-                    #"_x05ea__x05e6__x05d5__x05d2__x05",
-                    "fileRef"],
-        "id_map": [#"id",
-                   #"id",
-                   "id"]
+        'url': [  # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
+            # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
+            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
+            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
+        ],
+        'title_map': [  # "title",
+            # "title",
+            "title",
+            "title"],
+        "heading_map": [  # "summary",
+            # "summary",
+            "summary",
+            "summary"],
+        "content_map": [  # "comments",
+            # "content",
+            "details",
+            "content"],
+        "url_map": [  # "previewPage",
+            # "_x05ea__x05e6__x05d5__x05d2__x05",
+            "fileRef",
+            "fileRef"],
+        "id_map": [  # "id",
+            # "id",
+            "id",
+            "id"]
     }
     queryDf = pd.DataFrame(data)
 
@@ -119,6 +127,9 @@ try:
 
         for item in content:
             doc = item[content_column_name]
+            if doc is None:
+                continue
+
             clean_doc = remove_tags(doc)
 
             tokens = enc.encode(clean_doc)
@@ -136,14 +147,14 @@ try:
 
     document_embeddings = compute_doc_embeddings(df)
 
-    docs = order_by_similarity(#"חצר טבעית",
-                               "שנת לימודים",
-                               document_embeddings)
+    docs = order_by_similarity(  # "חצר טבעית",
+        "שנת לימודים",
+        document_embeddings)
     docs = docs[:5]
     print(docs)
 
     docIndex = docs[0][1]
-    print(df.iloc[docIndex].content)
+    print(df.iloc[docIndex])
 
 except requests.exceptions.HTTPError as error:
     print(error)
