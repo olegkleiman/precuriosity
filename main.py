@@ -23,7 +23,8 @@ def get_embedding(text: str, model: str = EMBEDDING_MODEL) -> list[float]:
         model=model,
         input=text
     )
-    return result["data"][0]["embedding"]
+    embeddings = result["data"][0]["embedding"]
+    return embeddings
 
 
 def compute_doc_embeddings(df: pd.DataFrame) -> dict[tuple[str, str], list[float]]:
@@ -85,53 +86,65 @@ df = pd.DataFrame({
 
 try:
     enc = tiktoken.encoding_for_model("gpt-4")
-    data = {
-        'url': [
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/פרוייקטים תכנון עיר/mobileapp",
-            "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הטבות/mobileapp"
-        ],
-        'title_map': [
-            "title",
-            "title",
-            "title",
-            "title",
-            "title",
-            "title"],
-        "heading_map": [
-            "summary",
-            "summary",
-            "summary",
-            "summary",
-            "summary",
-            "title"
-        ],
-        "content_map": [
-            "comments",
-            "content",
-            "details",
-            "content",
-            "summary",
-            "remarks"],
-        "url_map": [
-            "previewPage",
-            "_x05ea__x05e6__x05d5__x05d2__x05",
-            "fileRef",
-            "fileRef",
-            "fileRef",
-            "previewPage"],
-        "id_map": [
-            "id",
-            "id",
-            "id",
-            "id",
-            "id",
-            "id"]
-    }
-    queryDf = pd.DataFrame(data)
+    cnxn_str = ("Driver={SQL Server Native Client 11.0};"
+                "Server=tcp:tlvsearch.database.windows.net,1433;"
+                "Database=curiosity;"
+                "UID=okey;"
+                "PWD=dfnc94^*;")
+
+#"Server=tcp:tlvsearch.database.windows.net,1433;Initial Catalog=curiosity;Persist Security Info=False;User ID=okey;Password={your_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+    cnxn = pyodbc.connect(cnxn_str)
+    queryDf = pd.read_sql("select * from [dbo].[config] where is_enabled = 1", cnxn)
+    cnxn.close()
+
+    # data = {
+    #     'url': [
+    #         "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/אירועים/mobileapp",
+    #         # "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/כתבות/mobileapp",
+    #         "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הודעות דיגיתל/mobileapp",
+    #         "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/מבזקים/מבזקים בתוקף",
+    #         "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/פרוייקטים תכנון עיר/mobileapp",
+    #         "https://digitelmobile.tel-aviv.gov.il/SharepointData/api/ListData/הטבות/mobileapp"
+    #     ],
+    #     'title_map': [
+    #         "title",
+    #         # "title",
+    #         "title",
+    #         "title",
+    #         "title",
+    #         "title"],
+    #     "heading_map": [
+    #         "summary",
+    #         # "summary",
+    #         "summary",
+    #         "summary",
+    #         "summary",
+    #         "title"
+    #     ],
+    #     "content_map": [
+    #         "comments",
+    #         # "content",
+    #         "details",
+    #         "content",
+    #         "summary",
+    #         "remarks"],
+    #     "url_map": [
+    #         "previewPage",
+    #         # "_x05ea__x05e6__x05d5__x05d2__x05",
+    #         "fileRef",
+    #         "fileRef",
+    #         "fileRef",
+    #         "previewPage"],
+    #     "id_map": [
+    #         "id",
+    #         # "id",
+    #         "id",
+    #         "id",
+    #         "id",
+    #         "id"]
+    # }
+    # queryDf = pd.DataFrame(data)
 
     for index, ref in queryDf.iterrows():
         url = ref["url"]
@@ -141,7 +154,7 @@ try:
         title_column_name = ref["title_map"]
         content_column_name = ref["content_map"]
         head_column_name = ref["heading_map"]
-        url_column_name = ref["url_map"]
+        url_column_name = ref["link_map"]
         id_column_name = ref["id_map"]
 
         for item in content:
